@@ -1,0 +1,122 @@
+#!/bin/bash
+
+# Define colors for text
+WHITE="\033[1;37m"
+RESET="\033[0m"
+
+# Logo
+logo() {
+    echo "  ##  ###  #######  ######   #######  #######  #######  ######   #######  ##  ##   #######  ###### "
+    echo "  ### ###  ##   ##  ##  ##   ##       ##         ###    ##  ##     ###    ##  ##   ##       ##  ## "
+    echo "  #######  ##   ##  ##  ##   ##       #######    ###    ##  ##     ###    ## ##    ##       ##  ## "
+    echo "  ## ####  ##  ###  ### ###  #######       ##    ###    #######    ###    #######  #######  ####### "
+    echo "  ##  ###  ##  ###  ### ###  ###      ###  ##    ###    ### ###    ###    ##  ###  ###      ### ### "
+    echo "  ##  ###  ##  ###  ### ###  # #      ###  ##    ###    ### ###    ###    ##  ###  # #      ### ### "
+    echo "  ##  ###  #######  #######  #######  #######    ###    ### ###  #######  ##  ###  #######  ### ### "
+}
+
+# Function to install node
+install_node() {
+    echo "Starting node installation... 🌱"
+
+    # Update system and install required packages
+    sudo apt update && sudo apt install -y curl git make jq build-essential gcc unzip wget lz4 aria2 tmux
+
+    # Install Dria Launcher (check if it exists)
+    if [ ! -f "/usr/local/bin/dria-launcher" ]; then
+        echo "Downloading and installing Dria Launcher... 🚀"
+        curl -fsSL https://dria.co/launcher | bash
+    else
+        echo "Dria Launcher is already installed. ✅"
+    fi
+
+    # Install Ollama (check if it exists)
+    if [ ! -f "/usr/local/bin/ollama" ]; then
+        echo "Downloading and installing Ollama... 💻"
+        curl -fsSL https://ollama.com/install.sh | sh
+    else
+        echo "Ollama is already installed. ✅"
+    fi
+
+    # Start tmux with the command to launch the node
+    echo "Launching tmux session to start the node... 🖥️"
+
+    # Check if tmux session named 'dria_node' exists
+    tmux has-session -t dria_node 2>/dev/null
+
+    if [ $? != 0 ]; then
+        # If session doesn't exist, create a new one and run the command
+        tmux new-session -d -s dria_node 'dkn-compute-launcher start'
+        echo "Node successfully started in a new tmux session. 🎉"
+        tmux attach -t dria_node  # Attach to the new session
+    else
+        # If session exists, just attach to it
+        echo "Tmux session named 'dria_node' already exists. Attaching... 🔄"
+        tmux attach -t dria_node
+    fi
+}
+
+# Function to change settings
+change_settings() {
+    echo "Opening settings... ⚙️"
+    dkn-compute-launcher settings
+}
+
+# Function to check $DRIA Points
+check_points() {
+    echo "Checking $DRIA Points... 💰"
+    dkn-compute-launcher points
+}
+
+# Function for manual update
+update_manually() {
+    echo "Starting manual update... 🔄"
+    dkn-compute-launcher update
+}
+
+# Function to uninstall
+uninstall_node() {
+    echo "Starting node uninstallation... 🗑️"
+    dkn-compute-launcher uninstall
+}
+
+# Function to display the menu
+show_menu() {
+    # Check if tmux session exists
+    tmux has-session -t dria_menu 2>/dev/null
+    if [ $? != 0 ]; then
+        # If session doesn't exist, create a new one for menu
+        tmux new-session -d -s dria_menu
+    fi
+
+    clear
+    logo  # Display logo
+
+    # Menu text window
+    echo -e "\n${WHITE}╔═══════════════════════════════╗${RESET}"
+    echo -e "${WHITE}║        MANAGEMENT MENU        ║${RESET}"
+    echo -e "${WHITE}╚═══════════════════════════════╝${RESET}\n"
+
+    echo "====================================="
+    echo "Choose an action:"
+    echo "1. Install node 🌱"
+    echo "2. Change settings ⚙️"
+    echo "3. Check $DRIA Points 💰"
+    echo "4. Update manually 🔄"
+    echo "5. Uninstall node 🗑️"
+    echo "6. Exit 🚪"
+    echo "====================================="
+    read -p "Select an option [1-6]: " choice
+    case $choice in
+        1) install_node ;;
+        2) change_settings ;;
+        3) check_points ;;
+        4) update_manually ;;
+        5) uninstall_node ;;
+        6) tmux kill-session -t dria_menu; exit 0 ;;
+        *) echo "Invalid option, please try again. ❌"; sleep 2; show_menu ;;
+    esac
+}
+
+# Launch menu in tmux session
+tmux attach -t dria_menu || show_menu
