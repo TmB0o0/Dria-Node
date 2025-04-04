@@ -45,39 +45,54 @@ install_node() {
     tmux has-session -t dria_node 2>/dev/null
 
     if [ $? != 0 ]; then
-        # If session doesn't exist, create a new one and run the command
-        tmux new-session -d -s dria_node 'dkn-compute-launcher start'
+        # If session doesn't exist, create a new one
+        tmux new-session -d -s dria_node
+        # Send the command to start the node
+        tmux send-keys -t dria_node 'dkn-compute-launcher start' C-m
         echo "Node successfully started in a new tmux session. 🎉"
     else
-        echo "Tmux session named 'dria_node' already exists. 🔄"
+        # If the session exists, send the command to it
+        tmux send-keys -t dria_node 'dkn-compute-launcher start' C-m
+        echo "Tmux session named 'dria_node' already exists. Command sent. 🔄"
     fi
+
+    # Attach to the tmux session
+    tmux attach -t dria_node
 
     read -p "Press Enter to return to the menu..." dummy
     show_menu
-}
-
-# Function to change settings
-change_settings() {
-    echo "Opening settings... ⚙️"
-    dkn-compute-launcher settings
 }
 
 # Function to check $DRIA Points
 check_points() {
     echo "Checking $DRIA Points... 💰"
     dkn-compute-launcher points
+    read -p "Press Enter to return to the menu..." dummy
+    show_menu
 }
 
 # Function for manual update
 update_manually() {
     echo "Starting manual update... 🔄"
     dkn-compute-launcher update
+    read -p "Press Enter to return to the menu..." dummy
+    show_menu
 }
 
 # Function to uninstall
 uninstall_node() {
     echo "Starting node uninstallation... 🗑️"
     dkn-compute-launcher uninstall
+    read -p "Press Enter to return to the menu..." dummy
+    show_menu
+}
+
+# Function to view logs
+view_logs() {
+    echo "Attaching to tmux session to view logs... 📜"
+    tmux attach -t dria_node
+    read -p "Press Enter to return to the menu..." dummy
+    show_menu
 }
 
 # Function to display the menu
@@ -86,7 +101,7 @@ show_menu() {
     tmux has-session -t dria_menu 2>/dev/null
     if [ $? != 0 ]; then
         # If session doesn't exist, create a new one for menu
-        tmux new-session -d -s dria_menu
+        tmux new-session -s dria_menu
     fi
 
     clear
@@ -100,19 +115,19 @@ show_menu() {
     echo "====================================="
     echo "Choose an action:"
     echo "1. Install node 🌱"
-    echo "2. Change settings ⚙️"
-    echo "3. Check $DRIA Points 💰"
-    echo "4. Update manually 🔄"
-    echo "5. Uninstall node 🗑️"
+    echo "2. Check $DRIA Points 💰"
+    echo "3. Update manually 🔄"
+    echo "4. Uninstall node 🗑️"
+    echo "5. View logs 📜"
     echo "6. Exit 🚪"
     echo "====================================="
     read -p "Select an option [1-6]: " choice
     case $choice in
         1) install_node ;;
-        2) change_settings ;;
-        3) check_points ;;
-        4) update_manually ;;
-        5) uninstall_node ;;
+        2) check_points ;;
+        3) update_manually ;;
+        4) uninstall_node ;;
+        5) view_logs ;;
         6) tmux kill-session -t dria_menu; exit 0 ;;
         *) echo "Invalid option, please try again. ❌"; sleep 2; show_menu ;;
     esac
