@@ -48,12 +48,12 @@ install_node() {
         # If session doesn't exist, create a new one and run the command
         tmux new-session -d -s dria_node 'dkn-compute-launcher start'
         echo "Node successfully started in a new tmux session. 🎉"
-        tmux attach -t dria_node  # Attach to the new session
     else
-        # If session exists, just attach to it
-        echo "Tmux session named 'dria_node' already exists. Attaching... 🔄"
-        tmux attach -t dria_node
+        echo "Tmux session named 'dria_node' already exists. 🔄"
     fi
+
+    read -p "Press Enter to return to the menu..." dummy
+    show_menu
 }
 
 # Function to change settings
