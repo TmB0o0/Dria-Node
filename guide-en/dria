@@ -97,13 +97,6 @@ view_logs() {
 
 # Function to display the menu
 show_menu() {
-    # Check if tmux session exists
-    tmux has-session -t dria_menu 2>/dev/null
-    if [ $? != 0 ]; then
-        # If session doesn't exist, create a new one for menu
-        tmux new-session -s dria_menu
-    fi
-
     clear
     logo  # Display logo
 
@@ -128,10 +121,10 @@ show_menu() {
         3) update_manually ;;
         4) uninstall_node ;;
         5) view_logs ;;
-        6) tmux kill-session -t dria_menu; exit 0 ;;
+        6) exit 0 ;;
         *) echo "Invalid option, please try again. ❌"; sleep 2; show_menu ;;
     esac
 }
 
-# Launch menu in tmux session
-tmux attach -t dria_menu || show_menu
+# Start by showing the menu instead of tmux session
+show_menu
