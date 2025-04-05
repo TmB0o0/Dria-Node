@@ -1,3 +1,5 @@
+# Noda is temporarily out of commission!
+
 # Welcome to the DRIA Node Guide! 🎉
 
 This repository provides detailed instructions on how to set up and operate a node for the **DRIA** project. Here you will find both text and video guides to help you understand the process more easily. 🚀
